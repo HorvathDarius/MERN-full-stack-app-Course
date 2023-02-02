@@ -1,5 +1,6 @@
 import express, { Request, Response } from "express";
 import mongoose from 'mongoose';
+import cors from 'cors';
 
 import { config } from 'dotenv';
 config();
@@ -10,8 +11,18 @@ const PORT = 5000;
 
 const app = express();
 
+app.use(cors({
+    origin: "*"
+}));
 // To be able to work with JSON in the express server, in this case to log the req.body
 app.use(express.json());
+
+app.get("/decks", async (req: Request, res: Response) => {
+    // Fetch the decks from the db
+    const decks = await DeckModel.find();
+    // Return the documents in the repsonse
+    res.json(decks);
+});
 
 // Making a POST request on the /decks endpoint
 app.post("/decks", async (req: Request, res: Response) => {
@@ -25,10 +36,7 @@ app.post("/decks", async (req: Request, res: Response) => {
     res.json(createdDeck);
 });
 
-mongoose
-.connect(
-    process.env.MONGO_URL!
-).then(() => {
+mongoose.connect(process.env.MONGO_URL!).then(() => {
     console.log(`listening on port ${PORT}`);
     app.listen(PORT);
-})
+});
