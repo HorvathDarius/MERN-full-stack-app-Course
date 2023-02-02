@@ -14,6 +14,7 @@ const app = express();
 app.use(cors({
     origin: "*"
 }));
+
 // To be able to work with JSON in the express server, in this case to log the req.body
 app.use(express.json());
 
@@ -34,6 +35,15 @@ app.post("/decks", async (req: Request, res: Response) => {
     const createdDeck = await newDeck.save();
     // Returning the response which will be the state of the createdDeck document.
     res.json(createdDeck);
+});
+
+app.delete("/decks/:deckId", async (req: Request, res: Response) => {
+    // Get the deck id from the url
+    const deckId = req.params.deckId;
+    // Delete the deck from the db
+    const deck = await DeckModel.findByIdAndDelete(deckId);
+    // Return the deleted deck to the user
+    res.json(deck);
 });
 
 mongoose.connect(process.env.MONGO_URL!).then(() => {
