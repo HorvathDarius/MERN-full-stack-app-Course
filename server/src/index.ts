@@ -6,6 +6,12 @@ import { config } from 'dotenv';
 config();
 
 import DeckModel from "./models/Deck";
+import { getDecksController } from "./controllers/getDecksController";
+import { createDeckController } from "./controllers/createDeckController.ts";
+import { deleteDeckController } from "./controllers/deleteDeckController";
+import { createCardForDeckController } from "./controllers/createCardForDeckController";
+import { getDeckController } from "./controllers/getDeckController";
+import { deleteCardOnDeckController } from "./controllers/deleteCardOnDeckController";
 
 const PORT = 5000;
 
@@ -18,33 +24,12 @@ app.use(cors({
 // To be able to work with JSON in the express server, in this case to log the req.body
 app.use(express.json());
 
-app.get("/decks", async (req: Request, res: Response) => {
-    // Fetch the decks from the db
-    const decks = await DeckModel.find();
-    // Return the documents in the repsonse
-    res.json(decks);
-});
-
-// Making a POST request on the /decks endpoint
-app.post("/decks", async (req: Request, res: Response) => {
-    // Creating a new DeckModel item/document called newDeck, with the given title
-    const newDeck = new DeckModel({
-        title: req.body.title
-    });
-    // Saving it into the db, and returning its status, cause its a promise
-    const createdDeck = await newDeck.save();
-    // Returning the response which will be the state of the createdDeck document.
-    res.json(createdDeck);
-});
-
-app.delete("/decks/:deckId", async (req: Request, res: Response) => {
-    // Get the deck id from the url
-    const deckId = req.params.deckId;
-    // Delete the deck from the db
-    const deck = await DeckModel.findByIdAndDelete(deckId);
-    // Return the deleted deck to the user
-    res.json(deck);
-});
+app.get("/decks", getDecksController);
+app.post("/decks", createDeckController);
+app.delete("/decks/:deckId", deleteDeckController);
+app.get("/decks/:deckId", getDeckController);
+app.post("/decks/:deckId/cards", createCardForDeckController);
+app.delete("/decks/:deckId/cards/:index", deleteCardOnDeckController);
 
 mongoose.connect(process.env.MONGO_URL!).then(() => {
     console.log(`listening on port ${PORT}`);
